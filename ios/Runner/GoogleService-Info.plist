@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>698982686099-fqsfdn2kgr32dr13acnh180g1poh1siu.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.698982686099-fqsfdn2kgr32dr13acnh180g1poh1siu</string>
+	<key>API_KEY</key>
+	<string>AIzaSyC8C8yYo6opn29s3Xcinkhf0wKGZcs4N8M</string>
+	<key>GCM_SENDER_ID</key>
+	<string>698982686099</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.paydunya.projetVolaille</string>
+	<key>PROJECT_ID</key>
+	<string>vol-ayy</string>
+	<key>STORAGE_BUCKET</key>
+	<string>vol-ayy.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:698982686099:ios:10a5f56510a4149b9b1c66</string>
+	<key>DATABASE_URL</key>
+	<string>https://vol-ayy.firebaseio.com</string>
+</dict>
+</plist>
