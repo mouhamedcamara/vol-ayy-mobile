@@ -1,21 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:projet_volaille/http_services/box.dart';
+import 'package:projet_volaille/http_services/sale.dart';
+import 'package:projet_volaille/models/box.dart';
+import 'package:projet_volaille/models/sale.dart';
+import 'package:projet_volaille/models/user.dart';
+import 'package:projet_volaille/screens/history/history.dart';
+import 'package:toggle_switch/toggle_switch.dart';
 
 class SaleScreen extends StatefulWidget {
   static final String path = "lib/src/pages/login/login7.dart";
+  final User user;
+  SaleScreen({@required this.user});
+
   @override
   _SaleScreenState createState() => _SaleScreenState();
 }
 
 class _SaleScreenState extends State<SaleScreen> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final customerController = TextEditingController();
+  final boxController = TextEditingController();
+  final locationController = TextEditingController();
   final qtyController = TextEditingController();
   final priceController = TextEditingController();
+  var status = true;
+
+  final SaleService saleService = SaleService();
+  final BoxService boxService = BoxService();
+
+  //PageController(initialPage: 1, keepPage: false);
 
   @override
   void dispose() {
     // Clean up the controller when the widget is disposed.
     customerController.dispose();
+    boxController.dispose();
+    locationController.dispose();
     qtyController.dispose();
     priceController.dispose();
     super.dispose();
@@ -92,199 +113,254 @@ class _SaleScreenState extends State<SaleScreen> {
             ],
           ),
           SizedBox(
-            height: 10,
+            height: 5,
           ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 32),
-            child: Material(
-              elevation: 2.0,
-              borderRadius: BorderRadius.all(Radius.circular(30)),
-              child: TextField(
-                controller: customerController,
-                keyboardType: TextInputType.text,
-                onChanged: (String value) {},
-                cursorColor: Color.fromRGBO(111, 79, 29, 1),
-                decoration: InputDecoration(
-                    hintText: "Nom de la box",
-                    prefixIcon: Material(
-                      elevation: 0,
-                      borderRadius: BorderRadius.all(Radius.circular(30)),
-                      child: Icon(
-                        Icons.person,
-                        color: Color.fromRGBO(111, 79, 29, 1),
-                      ),
-                    ),
-                    border: InputBorder.none,
-                    contentPadding:
-                        EdgeInsets.symmetric(horizontal: 25, vertical: 13)),
-              ),
-            ),
-          ),
-          SizedBox(
-            height: 10,
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 32),
-            child: Material(
-              elevation: 2.0,
-              borderRadius: BorderRadius.all(Radius.circular(30)),
-              child: TextField(
-                controller: customerController,
-                keyboardType: TextInputType.text,
-                onChanged: (String value) {},
-                cursorColor: Color.fromRGBO(111, 79, 29, 1),
-                decoration: InputDecoration(
-                    hintText: "Nom du client",
-                    prefixIcon: Material(
-                      elevation: 0,
-                      borderRadius: BorderRadius.all(Radius.circular(30)),
-                      child: Icon(
-                        Icons.person,
-                        color: Color.fromRGBO(111, 79, 29, 1),
-                      ),
-                    ),
-                    border: InputBorder.none,
-                    contentPadding:
-                        EdgeInsets.symmetric(horizontal: 25, vertical: 13)),
-              ),
-            ),
-          ),
-          SizedBox(
-            height: 10,
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 32),
-            child: Material(
-              elevation: 2.0,
-              borderRadius: BorderRadius.all(Radius.circular(30)),
-              child: TextField(
-                controller: customerController,
-                keyboardType: TextInputType.text,
-                onChanged: (String value) {},
-                cursorColor: Color.fromRGBO(111, 79, 29, 1),
-                decoration: InputDecoration(
-                    hintText: "Lieu de la vente",
-                    prefixIcon: Material(
-                      elevation: 0,
-                      borderRadius: BorderRadius.all(Radius.circular(30)),
-                      child: Icon(
-                        Icons.location_on,
-                        color: Color.fromRGBO(111, 79, 29, 1),
-                      ),
-                    ),
-                    border: InputBorder.none,
-                    contentPadding:
-                        EdgeInsets.symmetric(horizontal: 25, vertical: 13)),
-              ),
-            ),
-          ),
-          SizedBox(
-            height: 10,
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 32),
-            child: Material(
-              elevation: 2.0,
-              borderRadius: BorderRadius.all(Radius.circular(30)),
-              child: TextField(
-                controller: qtyController,
-                keyboardType: TextInputType.number,
-                onChanged: (String value) {
-                  print(returnTotalAmount());
-                },
-                cursorColor: Color.fromRGBO(111, 79, 29, 1),
-                decoration: InputDecoration(
-                    hintText: "Quantité",
-                    prefixIcon: Material(
-                      elevation: 0,
-                      borderRadius: BorderRadius.all(Radius.circular(30)),
-                      child: Icon(
-                        Icons.confirmation_number,
-                        color: Color.fromRGBO(111, 79, 29, 1),
-                      ),
-                    ),
-                    border: InputBorder.none,
-                    contentPadding:
-                        EdgeInsets.symmetric(horizontal: 25, vertical: 13)),
-              ),
-            ),
-          ),
-          SizedBox(
-            height: 10,
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 32),
-            child: Material(
-              elevation: 2.0,
-              borderRadius: BorderRadius.all(Radius.circular(30)),
-              child: TextField(
-                controller: priceController,
-                keyboardType: TextInputType.number,
-                onChanged: (String value) {
-                  priceController.text = value;
-                },
-                cursorColor: Color.fromRGBO(111, 79, 29, 1),
-                decoration: InputDecoration(
-                    hintText: "Prix unitaire: 3.000",
-
-                    // labelText: "1.850",
-                    prefixIcon: Material(
-                      elevation: 0,
-                      borderRadius: BorderRadius.all(Radius.circular(30)),
-                      child: Icon(
-                        Icons.monetization_on,
-                        color: Color.fromRGBO(111, 79, 29, 1),
-                      ),
-                    ),
-                    suffix: Material(
-                        elevation: 0,
-                        borderRadius: BorderRadius.all(Radius.circular(30)),
-                        child: Text("Cfa",
-                            style: TextStyle(
-                                color: Color.fromRGBO(111, 79, 29, 1)))),
-                    border: InputBorder.none,
-                    contentPadding:
-                        EdgeInsets.symmetric(horizontal: 25, vertical: 13)),
-              ),
-            ),
-          ),
-          SizedBox(
-            height: 10,
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 30),
-            child: Row(
-              children: <Widget>[
-                Expanded(
-                  child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 10),
-                      child: Container(
-                        // width: 150,
-                        decoration: BoxDecoration(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(100)),
-                            color: Color.fromRGBO(111, 79, 29, 1)),
-                        child: FlatButton(
-                          child: Text(
-                            "Vendre",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 18),
+          Form(
+            key: _formKey,
+            child: Column(children: <Widget>[
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 32),
+                child: Material(
+                  elevation: 2.0,
+                  borderRadius: BorderRadius.all(Radius.circular(30)),
+                  child: TextFormField(
+                    controller: boxController,
+                    keyboardType: TextInputType.text,
+                    onChanged: (String value) {},
+                    cursorColor: Color.fromRGBO(111, 79, 29, 1),
+                    validator: (value) {
+                      if (value.isEmpty) return 'Saisissez le nom de la box!';
+                      return null;
+                    },
+                    decoration: InputDecoration(
+                        hintText: "Nom de la box",
+                        prefixIcon: Material(
+                          elevation: 0,
+                          borderRadius: BorderRadius.all(Radius.circular(30)),
+                          child: Icon(
+                            Icons.person,
+                            color: Color.fromRGBO(111, 79, 29, 1),
                           ),
-                          onPressed: () {
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) =>
-                                  _buildAboutDialog(context),
-                            );
-                            print(customerController.text);
-                          },
                         ),
-                      )),
+                        border: InputBorder.none,
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 25, vertical: 13)),
+                  ),
                 ),
-              ],
-            ),
+              ),
+              SizedBox(
+                height: 5,
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 32),
+                child: Material(
+                  elevation: 2.0,
+                  borderRadius: BorderRadius.all(Radius.circular(30)),
+                  child: TextFormField(
+                    controller: customerController,
+                    keyboardType: TextInputType.text,
+                    onChanged: (String value) {},
+                    cursorColor: Color.fromRGBO(111, 79, 29, 1),
+                    validator: (value) {
+                      if (value.isEmpty) return 'Saisissez le nom du client!';
+                      return null;
+                    },
+                    decoration: InputDecoration(
+                        hintText: "Nom du client",
+                        prefixIcon: Material(
+                          elevation: 0,
+                          borderRadius: BorderRadius.all(Radius.circular(30)),
+                          child: Icon(
+                            Icons.person,
+                            color: Color.fromRGBO(111, 79, 29, 1),
+                          ),
+                        ),
+                        border: InputBorder.none,
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 25, vertical: 13)),
+                  ),
+                ),
+              ),
+              SizedBox(
+                height: 5,
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 32),
+                child: Material(
+                  elevation: 2.0,
+                  borderRadius: BorderRadius.all(Radius.circular(30)),
+                  child: TextFormField(
+                    controller: locationController,
+                    keyboardType: TextInputType.text,
+                    onChanged: (String value) {},
+                    cursorColor: Color.fromRGBO(111, 79, 29, 1),
+                    validator: (value) {
+                      if (value.isEmpty)
+                        return 'Saisissez le lieu de la vente!';
+                      return null;
+                    },
+                    decoration: InputDecoration(
+                        hintText: "Lieu de la vente",
+                        prefixIcon: Material(
+                          elevation: 0,
+                          borderRadius: BorderRadius.all(Radius.circular(30)),
+                          child: Icon(
+                            Icons.location_on,
+                            color: Color.fromRGBO(111, 79, 29, 1),
+                          ),
+                        ),
+                        border: InputBorder.none,
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 25, vertical: 13)),
+                  ),
+                ),
+              ),
+              SizedBox(
+                height: 5,
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 32),
+                child: Material(
+                  elevation: 2.0,
+                  borderRadius: BorderRadius.all(Radius.circular(30)),
+                  child: TextFormField(
+                    controller: qtyController,
+                    keyboardType: TextInputType.number,
+                    onChanged: (String value) {
+                      print(returnTotalAmount());
+                    },
+                    cursorColor: Color.fromRGBO(111, 79, 29, 1),
+                    validator: (value) {
+                      if (value.isEmpty) return 'Saisissez le nombre à vendre!';
+                      return null;
+                    },
+                    decoration: InputDecoration(
+                        hintText: "Quantité",
+                        prefixIcon: Material(
+                          elevation: 0,
+                          borderRadius: BorderRadius.all(Radius.circular(30)),
+                          child: Icon(
+                            Icons.confirmation_number,
+                            color: Color.fromRGBO(111, 79, 29, 1),
+                          ),
+                        ),
+                        border: InputBorder.none,
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 25, vertical: 13)),
+                  ),
+                ),
+              ),
+              SizedBox(
+                height: 5,
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 32),
+                child: Material(
+                  elevation: 2.0,
+                  borderRadius: BorderRadius.all(Radius.circular(30)),
+                  child: TextFormField(
+                    controller: priceController,
+                    keyboardType: TextInputType.number,
+                    onChanged: (String value) {
+                      priceController.text = value;
+                    },
+                    cursorColor: Color.fromRGBO(111, 79, 29, 1),
+                    validator: (value) {
+                      if (value.isEmpty) return 'Saisissez le prix unitaire!';
+                      return null;
+                    },
+                    decoration: InputDecoration(
+                        hintText: "Prix unitaire: 3.000",
+
+                        // labelText: "1.850",
+                        prefixIcon: Material(
+                          elevation: 0,
+                          borderRadius: BorderRadius.all(Radius.circular(30)),
+                          child: Icon(
+                            Icons.monetization_on,
+                            color: Color.fromRGBO(111, 79, 29, 1),
+                          ),
+                        ),
+                        suffix: Material(
+                            elevation: 0,
+                            borderRadius: BorderRadius.all(Radius.circular(30)),
+                            child: Text("Cfa",
+                                style: TextStyle(
+                                    color: Color.fromRGBO(111, 79, 29, 1)))),
+                        border: InputBorder.none,
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 25, vertical: 13)),
+                  ),
+                ),
+              ),
+              SizedBox(
+                height: 10,
+              ),
+              Padding(
+                padding: EdgeInsets.only(right: 80, left: 34),
+                child: Material(
+                  elevation: 2.0,
+                  borderRadius: BorderRadius.all(Radius.circular(30)),
+                  child: ToggleSwitch(
+                    minWidth: 129.0,
+                    cornerRadius: 20.0,
+                    activeBgColor: Color.fromRGBO(111, 79, 29, 1),
+                    activeFgColor: Colors.white,
+                    inactiveBgColor: Colors.white,
+                    inactiveFgColor: Color.fromRGBO(111, 79, 29, 1),
+                    labels: ['Payé', 'Pas Payé'],
+                    icons: [Icons.check, Icons.save],
+                    onToggle: (index) {
+                      if (index == 1) {
+                        status = false;
+                      } else {
+                        status = true;
+                      }
+
+                      print('switched to: $status');
+                    },
+                  ),
+                ),
+              ),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 20, horizontal: 30),
+                child: Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 5),
+                          child: Container(
+                            // width: 150,
+                            decoration: BoxDecoration(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(100)),
+                                color: Color.fromRGBO(111, 79, 29, 1)),
+                            child: FlatButton(
+                              child: Text(
+                                "Vendre",
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 18),
+                              ),
+                              onPressed: () {
+                                if (_formKey.currentState.validate()) {
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) =>
+                                        _buildAboutDialog(context),
+                                  );
+                                  print(customerController.text);
+                                }
+                              },
+                            ),
+                          )),
+                    ),
+                  ],
+                ),
+              ),
+            ]),
           ),
         ],
       ),
@@ -303,8 +379,8 @@ class _SaleScreenState extends State<SaleScreen> {
         ),
       ),
       content: new Container(
-        height: 190,
-        padding: EdgeInsets.only(left: 1.0, top: 30, bottom: 0),
+        height: 210,
+        padding: EdgeInsets.only(left: 1.0, top: 30, bottom: 0, right: 1.0),
         child: Row(
           children: <Widget>[
             // Les Attributs
@@ -312,7 +388,27 @@ class _SaleScreenState extends State<SaleScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
+                  "Box: ",
+                  style: TextStyle(
+                      color: Color.fromRGBO(111, 79, 29, 1),
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold),
+                ),
+                SizedBox(
+                  height: 15,
+                ),
+                Text(
                   "Client: ",
+                  style: TextStyle(
+                      color: Color.fromRGBO(111, 79, 29, 1),
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold),
+                ),
+                SizedBox(
+                  height: 15,
+                ),
+                Text(
+                  "Lieu: ",
                   style: TextStyle(
                       color: Color.fromRGBO(111, 79, 29, 1),
                       fontSize: 13,
@@ -350,12 +446,15 @@ class _SaleScreenState extends State<SaleScreen> {
                 ),
               ],
             ),
+            SizedBox(
+              width: 65.0,
+            ),
             // Les Valeurs
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: <Widget>[
                 Text(
-                  "Ndeye Yacine Ndiaye",
+                  boxController.text,
                   style: TextStyle(
                       color: Color.fromRGBO(111, 79, 29, 1),
                       fontSize: 13,
@@ -365,7 +464,7 @@ class _SaleScreenState extends State<SaleScreen> {
                   height: 15,
                 ),
                 Text(
-                  "20",
+                  customerController.text,
                   style: TextStyle(
                       color: Color.fromRGBO(111, 79, 29, 1),
                       fontSize: 13,
@@ -375,7 +474,7 @@ class _SaleScreenState extends State<SaleScreen> {
                   height: 15,
                 ),
                 Text(
-                  "2500",
+                  locationController.text,
                   style: TextStyle(
                       color: Color.fromRGBO(111, 79, 29, 1),
                       fontSize: 13,
@@ -385,7 +484,7 @@ class _SaleScreenState extends State<SaleScreen> {
                   height: 15,
                 ),
                 Text(
-                  "546.900 CFA",
+                  qtyController.text,
                   style: TextStyle(
                       color: Color.fromRGBO(111, 79, 29, 1),
                       fontSize: 13,
@@ -393,6 +492,23 @@ class _SaleScreenState extends State<SaleScreen> {
                 ),
                 SizedBox(
                   height: 15,
+                ),
+                Text(
+                  priceController.text + " CFA",
+                  style: TextStyle(
+                      color: Color.fromRGBO(111, 79, 29, 1),
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold),
+                ),
+                SizedBox(
+                  height: 15,
+                ),
+                Text(
+                  "${returnTotalAmount()} CFA",
+                  style: TextStyle(
+                      color: Color.fromRGBO(111, 79, 29, 1),
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -414,8 +530,66 @@ class _SaleScreenState extends State<SaleScreen> {
                   fontWeight: FontWeight.w700,
                   fontSize: 18),
             ),
-            onPressed: () {
-              print(customerController.text);
+            onPressed: () async {
+              final String boxName = boxController.text;
+              final String customerName = customerController.text;
+              final String location = locationController.text;
+              final int qty = int.parse(qtyController.text);
+              final int unitPrice = int.parse(priceController.text);
+              final int totalPrice = int.parse(returnTotalAmount());
+              final String boxId = "2C99EB01-1BBA-416D-9139-00B0AB87498E";
+
+              final sale = Sale(
+                  boxId: boxId,
+                  clientName: customerName,
+                  clientNumber: 775679878,
+                  quantity: qty,
+                  unitPrice: unitPrice,
+                  totalPrice: totalPrice,
+                  location: location,
+                  status: status);
+
+              print("La vente a créé");
+              print(sale.toJson());
+              final result = await saleService.createSale(sale);
+              print("La vente est créée avec succés");
+
+              // print(result.toJson());
+
+              if (result != null) {
+                final account = Account(amount: totalPrice);
+                final resultat = await boxService.updateAccountAdd(account);
+
+                final title = 'Fait';
+                final text = (resultat != null)
+                    ? 'Box créée avec succés'
+                    : 'Un probléme est survenu';
+
+                showDialog(
+                    context: context,
+                    builder: (_) => AlertDialog(
+                          title: Text(title),
+                          content: Text(text),
+                          actions: <Widget>[
+                            FlatButton(
+                              child: Text('Ok'),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+
+                                Navigator.pop(context);
+
+                                setState(() {
+                                  boxController.clear();
+                                  qtyController.clear();
+                                  locationController.clear();
+                                  priceController.clear();
+                                  customerController.clear();
+                                });
+                              },
+                            )
+                          ],
+                        ));
+              }
             },
           ),
         ),
@@ -423,35 +597,35 @@ class _SaleScreenState extends State<SaleScreen> {
     );
   }
 
-  Container totalAmount() {
-    return Container(
-      margin: EdgeInsets.only(left: 15),
-      // padding: EdgeInsets.symmetric(vertical: 30),
-      child: SizedBox(
-        height: 50,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Text(
-              'Total: ',
-              style: TextStyle(
-                  color: Color.fromRGBO(111, 79, 29, 1),
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold),
-            ),
-            Text(
-              // "${returnTotalAmount()} Cfa",
-              '125.000 Cfa',
-              style: TextStyle(
-                  color: Color.fromRGBO(111, 79, 29, 1),
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold),
-            )
-          ],
-        ),
-      ),
-    );
-  }
+  // Container totalAmount() {
+  //   return Container(
+  //     margin: EdgeInsets.only(left: 15),
+  //     // padding: EdgeInsets.symmetric(vertical: 30),
+  //     child: SizedBox(
+  //       height: 50,
+  //       child: Row(
+  //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //         children: <Widget>[
+  //           Text(
+  //             'Total: ',
+  //             style: TextStyle(
+  //                 color: Color.fromRGBO(111, 79, 29, 1),
+  //                 fontSize: 18,
+  //                 fontWeight: FontWeight.bold),
+  //           ),
+  //           Text(
+  //             // "${returnTotalAmount()} Cfa",
+  //             '125.000 Cfa',
+  //             style: TextStyle(
+  //                 color: Color.fromRGBO(111, 79, 29, 1),
+  //                 fontSize: 18,
+  //                 fontWeight: FontWeight.bold),
+  //           )
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
 
   String returnTotalAmount() {
     int totalAmount = 0;
@@ -460,8 +634,8 @@ class _SaleScreenState extends State<SaleScreen> {
     //   totalAmount = int.parse(qtyController.text) * 1850;
     // }
 
-    totalAmount = int.parse(qtyController.text) * 1850;
-
+    totalAmount =
+        int.parse(qtyController.text) * int.parse(priceController.text);
     return totalAmount.toString();
   }
 }

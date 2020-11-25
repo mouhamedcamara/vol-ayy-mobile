@@ -18,7 +18,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
         backgroundColor: Color.fromRGBO(166, 124, 0, 1),
         elevation: 5.0,
       ),
-      backgroundColor: Color.fromRGBO(166, 124, 0, 1),
+      backgroundColor: Color.fromRGBO(225, 211, 177, 1),
       body: ListView(
         children: <Widget>[
           Stack(

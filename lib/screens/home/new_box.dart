@@ -1,19 +1,31 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:projet_volaille/http_services/box.dart';
+import 'package:projet_volaille/http_services/expense.dart';
+import 'package:projet_volaille/models/box.dart';
+import 'package:projet_volaille/models/expense.dart';
+import 'package:projet_volaille/models/user.dart';
 
 class NewBoxPage extends StatefulWidget {
   static final String path = "lib/src/pages/login/login7.dart";
+  final User user;
+  NewBoxPage({@required this.user});
   @override
   _NewBoxPageState createState() => _NewBoxPageState();
 }
 
 class _NewBoxPageState extends State<NewBoxPage> {
-  /// Which holds the selected date
-  /// Defaults to today's date.
   DateTime selectedDate = DateTime.now();
 
+  Box _box;
+  final BoxService boxService = BoxService();
+  final ExpenseService expenseService = ExpenseService();
+
   TextEditingController _controller = TextEditingController();
+  final TextEditingController _boxNameController = TextEditingController();
+  final TextEditingController _boxNumberController = TextEditingController();
+  final TextEditingController _boxExpenseController = TextEditingController();
 
   /// This decides which day will be enabled
   /// This will be called every time while displaying day in calender.
@@ -129,6 +141,7 @@ class _NewBoxPageState extends State<NewBoxPage> {
               child: TextField(
                 onChanged: (String value) {},
                 cursorColor: Colors.deepOrange,
+                controller: _boxNameController,
                 decoration: InputDecoration(
                     hintText: "Nom de la box",
                     prefixIcon: Material(
@@ -156,6 +169,7 @@ class _NewBoxPageState extends State<NewBoxPage> {
               child: TextField(
                 onChanged: (String value) {},
                 cursorColor: Colors.deepOrange,
+                controller: _boxNumberController,
                 decoration: InputDecoration(
                     hintText: "Nombre initial",
                     prefixIcon: Material(
@@ -183,6 +197,7 @@ class _NewBoxPageState extends State<NewBoxPage> {
               child: TextField(
                 onChanged: (String value) {},
                 cursorColor: Colors.deepOrange,
+                controller: _boxExpenseController,
                 decoration: InputDecoration(
                     hintText: "Dépense initiale",
                     prefixIcon: Material(
@@ -206,35 +221,7 @@ class _NewBoxPageState extends State<NewBoxPage> {
             ),
           ),
           SizedBox(
-            height: 20,
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 32),
-            child: Material(
-              elevation: 2.0,
-              borderRadius: BorderRadius.all(Radius.circular(30)),
-              child: TextField(
-                onTap: () => _selectDate(context),
-                cursorColor: Colors.deepOrange,
-                controller: _controller,
-                decoration: InputDecoration(
-                    hintText: "Date de naissance",
-                    prefixIcon: Material(
-                      elevation: 0,
-                      borderRadius: BorderRadius.all(Radius.circular(30)),
-                      child: Icon(
-                        Icons.data_usage,
-                        color: Color.fromRGBO(111, 79, 29, 1),
-                      ),
-                    ),
-                    border: InputBorder.none,
-                    contentPadding:
-                        EdgeInsets.symmetric(horizontal: 25, vertical: 13)),
-              ),
-            ),
-          ),
-          SizedBox(
-            height: 25,
+            height: 35,
           ),
           Padding(
               padding: EdgeInsets.symmetric(horizontal: 32),
@@ -250,7 +237,57 @@ class _NewBoxPageState extends State<NewBoxPage> {
                         fontWeight: FontWeight.w700,
                         fontSize: 18),
                   ),
-                  onPressed: () {},
+                  onPressed: () async {
+                    final String name = _boxNameController.text;
+                    final int number = int.parse(_boxNumberController.text);
+                    final int expense = int.parse(_boxExpenseController.text);
+                    final String userId = widget.user.id;
+
+                    final box = Box(
+                        userId: userId,
+                        name: name,
+                        number: number,
+                        expense: expense);
+
+                    final result = await boxService.createBox(box);
+                    print("La box a créée");
+
+                    // print(result.toJson());
+
+                    if (result != null) {
+                      final firstExpense = Expense(
+                          boxId: result.id,
+                          amount: expense,
+                          description: "Dépenses initiales");
+                      final expResult =
+                          await expenseService.createExpense(firstExpense);
+
+                      final title = 'Fait';
+                      final text = (expResult != null)
+                          ? 'Box créée avec succés'
+                          : 'Un probléme est survenu';
+
+                      showDialog(
+                          context: context,
+                          builder: (_) => AlertDialog(
+                                title: Text(title),
+                                content: Text(text),
+                                actions: <Widget>[
+                                  FlatButton(
+                                    child: Text('Ok'),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                      Navigator.pop(context);
+                                    },
+                                  )
+                                ],
+                              ));
+                    }
+
+                    setState(() {
+                      _box = box;
+                    });
+                  },
                 ),
               )),
         ],
@@ -258,6 +295,31 @@ class _NewBoxPageState extends State<NewBoxPage> {
     );
   }
 
+  // Padding(
+  //           padding: EdgeInsets.symmetric(horizontal: 32),
+  //           child: Material(
+  //             elevation: 2.0,
+  //             borderRadius: BorderRadius.all(Radius.circular(30)),
+  //             child: TextField(
+  //               onTap: () => _selectDate(context),
+  //               cursorColor: Colors.deepOrange,
+  //               controller: _controller,
+  //               decoration: InputDecoration(
+  //                   hintText: "Date de naissance",
+  //                   prefixIcon: Material(
+  //                     elevation: 0,
+  //                     borderRadius: BorderRadius.all(Radius.circular(30)),
+  //                     child: Icon(
+  //                       Icons.data_usage,
+  //                       color: Color.fromRGBO(111, 79, 29, 1),
+  //                     ),
+  //                   ),
+  //                   border: InputBorder.none,
+  //                   contentPadding:
+  //                       EdgeInsets.symmetric(horizontal: 25, vertical: 13)),
+  //             ),
+  //           ),
+  //         ),
   // IOS DatePicker
 
   buildCupertinoDatePicker(BuildContext context) {

@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:projet_volaille/screens/chats/modules/chat_page.dart';
+import 'package:projet_volaille/globals.dart';
+import 'package:projet_volaille/models/user.dart';
+// import 'package:projet_volaille/screens/chats/modules/chat_page.dart';
 import 'package:projet_volaille/screens/history/history.dart';
 import 'package:projet_volaille/screens/home/components/bottombar.dart';
 import 'package:projet_volaille/screens/home/homeScreen.dart';
@@ -11,7 +13,6 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -22,9 +23,10 @@ class MyApp extends StatelessWidget {
 
 class Home extends StatefulWidget {
   static final String path = "lib/src/pages/misc/navybar.dart";
-  // final User user;
 
-  // const Home({Key key, this.user}) : super(key: key);
+  final User user;
+  final String token;
+  Home({this.user, this.token});
 
   @override
   HomeState createState() => new HomeState();
@@ -39,14 +41,13 @@ class HomeState extends State<Home> {
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  // FirebaseAuth _auth = FirebaseAuth.instance;
-
   PageController pageController = PageController(initialPage: 0);
   StreamController<int> indexcontroller = StreamController<int>.broadcast();
   int index = 0;
 
   @override
   Widget build(BuildContext context) {
+    pageController = pageController;
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
@@ -64,14 +65,25 @@ class HomeState extends State<Home> {
         },
         controller: pageController,
         children: <Widget>[
-          HomeScreen(),
-          SaleScreen(),
+          HomeScreen(
+            user: widget.user,
+            onFinish: () {
+              index = 2;
+              setState(() {
+                indexcontroller.add(index);
+                pageController.jumpToPage(index);
+              });
+            },
+          ),
+          SaleScreen(
+            user: widget.user,
+          ),
           HistoryList(),
           // ChatPage(),
         ],
       ),
       bottomNavigationBar: StreamBuilder<Object>(
-          initialData: 0,
+          initialData: index,
           stream: indexcontroller.stream,
           builder: (context, snapshot) {
             int cIndex = snapshot.data;
@@ -84,8 +96,6 @@ class HomeState extends State<Home> {
                     icon: Icon(Icons.point_of_sale), title: Text('Vendre')),
                 FancyBottomNavigationItem(
                     icon: Icon(Icons.history), title: Text('Historique')),
-                // FancyBottomNavigationItem(
-                //     icon: Icon(Icons.chat_bubble), title: Text('Chats')),
               ],
               onItemSelected: (int value) {
                 indexcontroller.add(value);

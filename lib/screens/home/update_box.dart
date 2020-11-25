@@ -1,15 +1,42 @@
 import 'package:flutter/material.dart';
-import 'package:projet_volaille/screens/auth/resetpassword.dart';
+import 'package:projet_volaille/http_services/box.dart';
+import 'package:projet_volaille/http_services/death.dart';
+import 'package:projet_volaille/http_services/expense.dart';
+import 'package:projet_volaille/models/box.dart';
+import 'package:intl/intl.dart';
+import 'package:projet_volaille/models/death.dart';
+import 'package:projet_volaille/models/expense.dart';
 import 'package:projet_volaille/screens/home/box_expenses.dart';
 
 class UpdateBoxPage extends StatefulWidget {
+  final Box box;
+  UpdateBoxPage({@required this.box});
   @override
   _UpdateBoxPageState createState() => _UpdateBoxPageState();
 }
 
 class _UpdateBoxPageState extends State<UpdateBoxPage> {
+  final today = DateTime.now();
+  final ExpenseService expenseService = ExpenseService();
+  final DeathService deathService = DeathService();
+  final BoxService boxService = BoxService();
+
+  final TextEditingController _amountController = TextEditingController();
+  final TextEditingController _numberController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
+    var death = 0;
+    var expense = 0;
+    boxService.getDeaths(widget.box.id).then((value) {
+      death = value;
+    });
+
+    boxService.getExpense(widget.box.id).then((value) {
+      expense = value;
+    });
+
     return Scaffold(
       backgroundColor: Color.fromRGBO(225, 211, 177, 1),
       appBar: AppBar(
@@ -29,7 +56,7 @@ class _UpdateBoxPageState extends State<UpdateBoxPage> {
           Padding(
             padding: EdgeInsets.only(left: 10),
             child: Text(
-              "Box N° 122",
+              widget.box.name,
               style: TextStyle(
                   color: Color.fromRGBO(111, 79, 29, 1),
                   fontSize: 20,
@@ -115,7 +142,7 @@ class _UpdateBoxPageState extends State<UpdateBoxPage> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: <Widget>[
                       Text(
-                        "24",
+                        "${today.difference(DateTime.parse(widget.box.createdAt)).inDays}",
                         style: TextStyle(
                             color: Color.fromRGBO(111, 79, 29, 1),
                             fontSize: 16,
@@ -125,7 +152,7 @@ class _UpdateBoxPageState extends State<UpdateBoxPage> {
                         height: 15,
                       ),
                       Text(
-                        "350",
+                        "${widget.box.number - widget.box.death - widget.box.vendu}",
                         style: TextStyle(
                             color: Color.fromRGBO(111, 79, 29, 1),
                             fontSize: 16,
@@ -135,7 +162,7 @@ class _UpdateBoxPageState extends State<UpdateBoxPage> {
                         height: 15,
                       ),
                       Text(
-                        "23",
+                        "$death",
                         style: TextStyle(
                             color: Color.fromRGBO(111, 79, 29, 1),
                             fontSize: 16,
@@ -145,7 +172,7 @@ class _UpdateBoxPageState extends State<UpdateBoxPage> {
                         height: 15,
                       ),
                       Text(
-                        "546.900 CFA",
+                        _formatCurrency(widget.box.expense),
                         style: TextStyle(
                             color: Color.fromRGBO(111, 79, 29, 1),
                             fontSize: 16,
@@ -155,7 +182,7 @@ class _UpdateBoxPageState extends State<UpdateBoxPage> {
                         height: 15,
                       ),
                       Text(
-                        "245",
+                        "${widget.box.vendu}",
                         style: TextStyle(
                             color: Color.fromRGBO(111, 79, 29, 1),
                             fontSize: 16,
@@ -165,7 +192,7 @@ class _UpdateBoxPageState extends State<UpdateBoxPage> {
                         height: 15,
                       ),
                       Text(
-                        "546.900 CFA",
+                        _formatCurrency(widget.box.revenu),
                         style: TextStyle(
                             color: Color.fromRGBO(111, 79, 29, 1),
                             fontSize: 16,
@@ -238,7 +265,7 @@ class _UpdateBoxPageState extends State<UpdateBoxPage> {
               onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ExpenseList(),
+                    builder: (context) => ExpenseList(box: widget.box),
                   )),
               child: Padding(
                 padding: EdgeInsets.all(10.0),
@@ -271,6 +298,7 @@ class _UpdateBoxPageState extends State<UpdateBoxPage> {
               fontWeight: FontWeight.bold),
         ),
       ),
+      backgroundColor: Color.fromRGBO(225, 211, 177, 1),
       content: new Container(
         // height: 190,
         padding: EdgeInsets.only(left: 1.0, top: 30, bottom: 0),
@@ -280,7 +308,7 @@ class _UpdateBoxPageState extends State<UpdateBoxPage> {
             elevation: 2.0,
             borderRadius: BorderRadius.all(Radius.circular(30)),
             child: TextField(
-              // controller: qtyController,
+              controller: _numberController,
               keyboardType: TextInputType.number,
               cursorColor: Color.fromRGBO(111, 79, 29, 1),
               decoration: InputDecoration(
@@ -315,7 +343,33 @@ class _UpdateBoxPageState extends State<UpdateBoxPage> {
                   fontWeight: FontWeight.w700,
                   fontSize: 18),
             ),
-            onPressed: () {},
+            onPressed: () async {
+              final int number = int.parse(_numberController.text);
+
+              final death = Death(boxId: widget.box.id, number: number);
+              final deathResult = await deathService.createDeath(death);
+
+              final title = 'Fait';
+              final text = (deathResult != null)
+                  ? 'Décés enregistré avec succés'
+                  : 'Un probléme est survenu';
+
+              showDialog(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                        title: Text(title),
+                        content: Text(text),
+                        actions: <Widget>[
+                          FlatButton(
+                            child: Text('Ok'),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              Navigator.pop(context);
+                            },
+                          )
+                        ],
+                      ));
+            },
           ),
         ),
       ],
@@ -333,10 +387,9 @@ class _UpdateBoxPageState extends State<UpdateBoxPage> {
               fontWeight: FontWeight.bold),
         ),
       ),
+      backgroundColor: Color.fromRGBO(225, 211, 177, 1),
       content: new Container(
         height: 190,
-        // width: 10,
-        // color: Colors.red,
         padding: EdgeInsets.only(left: 1.0, top: 30, bottom: 0),
         child: Column(
           children: <Widget>[
@@ -349,6 +402,7 @@ class _UpdateBoxPageState extends State<UpdateBoxPage> {
                   keyboardType: TextInputType.text,
                   onChanged: (String value) {},
                   cursorColor: Color.fromRGBO(111, 79, 29, 1),
+                  controller: _amountController,
                   decoration: InputDecoration(
                       hintText: "Montant",
                       prefixIcon: Material(
@@ -376,8 +430,9 @@ class _UpdateBoxPageState extends State<UpdateBoxPage> {
                 child: TextField(
                   keyboardType: TextInputType.number,
                   cursorColor: Color.fromRGBO(111, 79, 29, 1),
+                  controller: _descriptionController,
                   decoration: InputDecoration(
-                      hintText: "Produits",
+                      hintText: "Description",
                       prefixIcon: Material(
                         elevation: 0,
                         borderRadius: BorderRadius.all(Radius.circular(30)),
@@ -410,10 +465,52 @@ class _UpdateBoxPageState extends State<UpdateBoxPage> {
                   fontWeight: FontWeight.w700,
                   fontSize: 18),
             ),
-            onPressed: () {},
+            onPressed: () async {
+              final int amount = int.parse(_amountController.text);
+              final String description = _descriptionController.text;
+              final firstExpense = Expense(
+                  boxId: widget.box.id,
+                  amount: amount,
+                  description: description);
+              final expResult =
+                  await expenseService.createExpense(firstExpense);
+
+              if (expResult != null) {
+                final account = Account(amount: amount);
+                final resultat =
+                    await boxService.updateAccountSubstract(account);
+
+                final title = 'Fait';
+                final text = (resultat != null)
+                    ? 'Dépense ajoutée avec succés'
+                    : 'Un probléme est survenu';
+
+                showDialog(
+                    context: context,
+                    builder: (_) => AlertDialog(
+                          title: Text(title),
+                          content: Text(text),
+                          actions: <Widget>[
+                            FlatButton(
+                              child: Text('Ok'),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                Navigator.pop(context);
+                              },
+                            )
+                          ],
+                        ));
+              }
+            },
           ),
         ),
       ],
     );
   }
+}
+
+String _formatCurrency(int amount) {
+  var f = new NumberFormat.currency(
+      locale: "fr-FR", symbol: "Fcfa", decimalDigits: 0);
+  return '${f.format(amount)}';
 }

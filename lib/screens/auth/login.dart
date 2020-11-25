@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:projet_volaille/http_services/user.dart';
+import 'package:projet_volaille/models/user.dart';
 import 'package:projet_volaille/screens/auth/resetpassword.dart';
 import 'package:projet_volaille/screens/home/home.dart';
 
@@ -9,6 +11,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final UserService userService = UserService();
   // FirebaseAuth _auth = FirebaseAuth.instance;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
@@ -17,6 +20,8 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    print("Le user");
+    print(userService.getUser("/j8sc2cCmAMqh40ugGq3Wg=="));
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: Color.fromRGBO(166, 124, 0, 0.3),
@@ -101,10 +106,11 @@ class _LoginPageState extends State<LoginPage> {
                     child: TextFormField(
                       onChanged: (String value) {},
                       cursorColor: Colors.deepOrange,
-                      // validator: (value) {
-                      //   if (value.isEmpty) return 'Saisissez votre email';
-                      //   return null;
-                      // },
+                      validator: (value) {
+                        if (value.isEmpty) return 'Saisissez votre email';
+                        return null;
+                      },
+                      controller: _emailController,
                       decoration: InputDecoration(
                           hintText: "Non d'utilisateur",
                           prefixIcon: Material(
@@ -132,11 +138,12 @@ class _LoginPageState extends State<LoginPage> {
                     child: TextFormField(
                       onChanged: (String value) {},
                       cursorColor: Colors.deepOrange,
-                      // validator: (value) {
-                      //   if (value.isEmpty)
-                      //     return 'Saisissez votre mot de passe';
-                      //   return null;
-                      // },
+                      validator: (value) {
+                        if (value.isEmpty)
+                          return 'Saisissez votre mot de passe';
+                        return null;
+                      },
+                      controller: _passwordController,
                       decoration: InputDecoration(
                           hintText: "Mot de passe",
                           prefixIcon: Material(
@@ -163,20 +170,40 @@ class _LoginPageState extends State<LoginPage> {
                           borderRadius: BorderRadius.all(Radius.circular(100)),
                           color: Color.fromRGBO(111, 79, 29, 1)),
                       child: FlatButton(
-                        minWidth: 320.0,
-                        child: Text(
-                          "Connexion",
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 18),
-                        ),
-                        onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => Home(),
-                            )),
-                      ),
+                          minWidth: 320.0,
+                          child: Text(
+                            "Connexion",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 18),
+                          ),
+                          onPressed: () async {
+                            if (_formKey.currentState.validate()) {
+                              final String userPhone = _emailController.text;
+                              final String password = _passwordController.text;
+
+                              final user =
+                                  User(phone: userPhone, password: password);
+
+                              final result = await userService.login(user);
+                              print(
+                                  "Le resulta de la connextion de: '${user.phone}' et ${user.password} est $result");
+
+                              if (result != null) {
+                                userService.getUser(result.token).then((value) {
+                                  Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => Home(
+                                          user: value,
+                                          token: result.token,
+                                        ),
+                                      ));
+                                });
+                              }
+                            }
+                          }),
                     )),
               ],
             ),
